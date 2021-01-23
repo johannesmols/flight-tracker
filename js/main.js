@@ -1,4 +1,4 @@
-var map = L.map('mapid').setView([51.505, -0.09], 13);
+var map = L.map('mapid').setView([51.505, -0.09], 5);
 
 // Mapbox tiles
 L.tileLayer('https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token={accessToken}', {
@@ -16,17 +16,101 @@ L.tileLayer('https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_toke
     subdomains: ['a','b','c']
 }).addTo(map);*/
 
-var marker = L.marker([51.5, -0.09]).addTo(map);
+// Parse flight records
 
-var circle = L.circle([51.508, -0.11], {
-    color: 'red',
-    fillColor: '#f03',
-    fillOpacity: 0.5,
-    radius: 500
-}).addTo(map);
+var allAirports;
+var allFlights;
 
-var polygon = L.polygon([
-    [51.509, -0.08],
-    [51.503, -0.06],
-    [51.51, -0.047]
-]).addTo(map);
+const getColumn = (arr, n) => arr.map(x => x[n]);
+
+async function loadData() {
+    const loadAirports = parse("data/airports.csv").then(function (results) {
+        allAirports = results.data;
+    });
+    
+    const loadFlights = parse("data/flights.csv").then(function (results) {
+        allFlights = results.data;
+    });
+
+    Promise.all([loadAirports, loadFlights]).then(() => {
+        renderFlights(allFlights)
+    });
+}
+
+function parse(url) {
+    return new Promise(function(complete, error) {
+        Papa.parse(url, {complete, error, download: true, dynamicTyping: true});
+    });
+};
+
+function renderFlights(data) {
+    const rows = data[0].length;
+    for (var i = 0; i < rows; i++) {
+        var colData = getColumn(data, i).filter(function (el) { return el != null; });
+        var plane = colData[0];
+        var airports = colData.length > 1 ? colData.slice(1) : null;
+
+        if (airports) {
+            var color = getRandomColor();
+            var coordinates = [];
+            for (var j = 0; j < airports.length; j++) {
+                var coords = lookUpAirport(airports[j]);
+                if (coords) {
+                    coordinates.push(coords);
+                }
+            }
+
+            coordinates.forEach(e => addMarkerToMap(e, color));
+            for (var c = 0; c < coordinates.length - 1; c++) {
+                addLineToMap(coordinates[c], coordinates[c + 1], color);
+            }
+        }
+    }
+}
+
+function lookUpAirport(identOrCoords) {
+    if (identOrCoords.match(/^[A-z0-9]{4}$/)) {
+        const icao = identOrCoords.toUpperCase();
+        const result = allAirports[getColumn(allAirports, 1).indexOf(icao)];
+
+        if (result) {
+            return [result[4], result[5]];
+        } else {
+            console.error('Could not find airport with code ' + icao);
+        }
+    } else {
+        var coords = identOrCoords.split(';');
+
+        if (coords.length == 2) {
+            return [Number(coords[0]), Number(coords[1])];
+        } {
+            console.error('Could not read coordinates ' + coords);
+        }
+    }
+}
+
+function getRandomColor() {
+    var letters = '0123456789ABCDEF';
+    var color = '#';
+    for (var i = 0; i < 6; i++) {
+        color += letters[Math.floor(Math.random() * 16)];
+    }
+    return color;
+}
+
+function addMarkerToMap(coordinates, color) {
+    var circle = L.circle(coordinates, {
+        color: color,
+        fillColor: color,
+        fillOpacity: 0.1,
+        radius: 50
+    }).addTo(map);
+}
+
+function addLineToMap(start, end, color) {
+    var line = L.polyline([start, end], {
+        color: color
+    }).addTo(map);
+}
+
+loadData();
