@@ -1,4 +1,8 @@
-var map = L.map('mapid').setView([51.505, -0.09], 2);
+var map = L.map('mapid', {
+    center: [51.505, -0.09],
+    zoom: 5,
+    worldCopyJump: true
+});
 
 // Mapbox tiles
 L.tileLayer('https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token={accessToken}', {
@@ -15,8 +19,6 @@ L.tileLayer('https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_toke
     attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
     subdomains: ['a','b','c']
 }).addTo(map);*/
-
-// Parse flight records
 
 var allAirports;
 var allFlights;
@@ -99,7 +101,7 @@ function getRandomColor() {
 }
 
 function addMarkerToMap(coordinates, color) {
-    var circle = L.circle(filterCoordinate(coordinates), {
+    var circle = L.circle(coordinates, {
         color: color,
         fillColor: color,
         fillOpacity: 0.1,
@@ -108,16 +110,41 @@ function addMarkerToMap(coordinates, color) {
 }
 
 function addLineToMap(start, end, color) {
-    var line = L.polyline([filterCoordinate(start), filterCoordinate(end)], {
-        color: color
-    }).addTo(map);
-}
+    // Check whether line crosses the 180th meridian, and split in two if it is the case
+    // https://gis.stackexchange.com/a/18986
+    if (false) {//Math.abs(start[1] - end[1]) > 180.0) {
+        console.log('start and end coordinates', start, end);
 
-function filterCoordinate(coord) {
-    return coord; // cuts off stuff on the other side then...
-    var lat = L.Util.wrapNum(coord[0], [0, 360], true);
-    var lng = L.Util.wrapNum(coord[1], [0, 360], true);
-    return [lat, lng];
+        const start_dist_to_antimeridian = start[1] > 0 ? 180 - start[1] : 180 + start[1];
+        const end_dist_to_antimeridian = end[1] > 0 ? 180 - end[1] : 180 + end[1];
+        const lat_difference = Math.abs(start[0] - end[0]);
+        const alpha_angle = Math.atan(lat_difference / (start_dist_to_antimeridian + end_dist_to_antimeridian)) * (180 / Math.PI);
+        const lat_diff_at_antimeridian = Math.tan(alpha_angle * Math.PI / 180) * start_dist_to_antimeridian;
+
+        //const end_first_line = [start[0] + lat_diff_at_antimeridian, ];
+        //const start_second_line = 
+
+        /*console.log('start and end', start, end);
+
+        const cart_start = [Math.cos(start[1]) * Math.sin(start[0]), Math.sin(start[1]) * Math.sin(start[0]), Math.cos(start[0])];
+        const cart_end = [Math.cos(end[1]) * Math.sin(end[0]), Math.sin(end[1]) * Math.sin(end[0]), Math.cos(end[0])];
+        const t = cart_end[1] / (cart_end[1] - cart_start[1]);
+        const inters = [t * cart_start[0] + (1 - t) * cart_end[0], 0, t * cart_start[2] + (1 - t) * cart_end[2]];
+        const inters_lat = Math.atan(inters[2] / inters[0]);
+
+        console.log('start and end cartesian', cart_start, cart_end);
+        console.log('t', t);
+        console.log('inters cart', inters);
+        console.log('intersection', inters_lat);
+
+        var line = L.polyline([start, [-179.999, inters_lat]], {
+            color: color
+        }).addTo(map);*/
+    } else {
+        var line = L.polyline([start, end], {
+            color: color
+        }).addTo(map);
+    }
 }
 
 loadData();
