@@ -1,4 +1,4 @@
-var map = L.map('mapid').setView([51.505, -0.09], 5);
+var map = L.map('mapid').setView([51.505, -0.09], 2);
 
 // Mapbox tiles
 L.tileLayer('https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token={accessToken}', {
@@ -99,7 +99,7 @@ function getRandomColor() {
 }
 
 function addMarkerToMap(coordinates, color) {
-    var circle = L.circle(coordinates, {
+    var circle = L.circle(filterCoordinate(coordinates), {
         color: color,
         fillColor: color,
         fillOpacity: 0.1,
@@ -108,9 +108,16 @@ function addMarkerToMap(coordinates, color) {
 }
 
 function addLineToMap(start, end, color) {
-    var line = L.polyline([start, end], {
+    var line = L.polyline([filterCoordinate(start), filterCoordinate(end)], {
         color: color
     }).addTo(map);
+}
+
+function filterCoordinate(coord) {
+    return coord; // cuts off stuff on the other side then...
+    var lat = L.Util.wrapNum(coord[0], [0, 360], true);
+    var lng = L.Util.wrapNum(coord[1], [0, 360], true);
+    return [lat, lng];
 }
 
 loadData();
