@@ -46,6 +46,28 @@ function getPointMarker(color) {
     });
 }
 
+function getAirplaneMarker(color) {
+    const markerHtmlStyles = `
+        background-color: ${color};
+        width: 12px;
+        height: 12px;
+        display: block;
+        position: relative;
+        border-radius: 1rem;
+        transform: rotate(0deg);
+        opacity: 0.5;
+        border: 1px solid #FFFFFF`;
+
+    return icon = L.divIcon({
+        className: "marker",
+        iconSize: [12, 12],
+        iconAnchor: [6, 12],
+        labelAnchor: [-6, 0],
+        popupAnchor: [0, -36],
+        html: `<span style="${markerHtmlStyles}" />`
+    });
+}
+
 
 // Data and rendering
 
@@ -88,7 +110,12 @@ function renderFlights(data) {
                 var result = lookUpAirport(airports[j]);
                 if (result[0]) {
                     coordinates.push(result[0]);
-                    addMarkerToMap(result[0], color, result[1] ? `${airports[j]} - ${result[1]}` : `${airports[j].replace(';', ', ')}`);
+
+                    if (j === airports.length - 1) {
+                        addMarkerToMap(result[0], color, result[1] ? `${plane} - ${airports[j]} - ${result[1]}` : `${plane} - ${airports[j].replace(';', ', ')}`, true);
+                    } else {
+                        addMarkerToMap(result[0], color, result[1] ? `${airports[j]} - ${result[1]}` : `${airports[j].replace(';', ', ')}`, false);
+                    }
                 }
             }
 
@@ -125,10 +152,12 @@ function getRandomColor() {
     return colors[Math.floor(Math.random() * colors.length)];
 }
 
-function addMarkerToMap(coordinates, color, popup) {
-    L.marker(coordinates, { icon: getPointMarker(color) }).addTo(map).bindPopup(popup);
-    L.marker([coordinates[0], coordinates[1] - 360], { icon: getPointMarker(color) }).addTo(map).bindPopup(popup);
-    L.marker([coordinates[0], coordinates[1] + 360], { icon: getPointMarker(color) }).addTo(map).bindPopup(popup);
+function addMarkerToMap(coordinates, color, popup, isAirplane) {
+    var icon = isAirplane ? getAirplaneMarker(color) : getPointMarker(color);
+
+    L.marker(coordinates, { icon: icon }).addTo(map).bindPopup(popup);
+    L.marker([coordinates[0], coordinates[1] - 360], { icon: icon }).addTo(map).bindPopup(popup);
+    L.marker([coordinates[0], coordinates[1] + 360], { icon: icon }).addTo(map).bindPopup(popup);
 }
 
 function addLineToMap(start, end, color) {
