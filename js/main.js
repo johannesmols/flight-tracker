@@ -104,6 +104,20 @@ function addMarkerToMap(coordinates, color) {
         fillOpacity: 0.1,
         radius: 50
     }).addTo(map);
+
+    var circleLeft = L.circle([coordinates[0], coordinates[1] - 360], {
+        color: color,
+        fillColor: color,
+        fillOpacity: 0.1,
+        radius: 50
+    }).addTo(map);
+
+    var circleRight = L.circle([coordinates[0], coordinates[1] + 360], {
+        color: color,
+        fillColor: color,
+        fillOpacity: 0.1,
+        radius: 50
+    }).addTo(map);
 }
 
 function addLineToMap(start, end, color) {
