@@ -21,6 +21,34 @@ L.tileLayer('https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_toke
     subdomains: ['a','b','c']
 }).addTo(map);*/
 
+
+// Icons
+
+function getPointMarker(color) {
+    const markerHtmlStyles = `
+        background-color: ${color};
+        width: 12px;
+        height: 12px;
+        display: block;
+        position: relative;
+        border-radius: 1rem;
+        transform: rotate(0deg);
+        opacity: 0.5;
+        border: 1px solid #FFFFFF`;
+
+    return icon = L.divIcon({
+        className: "marker",
+        iconSize: [12, 12],
+        iconAnchor: [6, 12],
+        labelAnchor: [-6, 0],
+        popupAnchor: [0, -36],
+        html: `<span style="${markerHtmlStyles}" />`
+    });
+}
+
+
+// Data and rendering
+
 var allAirports;
 var allFlights;
 
@@ -97,27 +125,10 @@ function getRandomColor() {
     return colors[Math.floor(Math.random() * colors.length)];
 }
 
-function addMarkerToMap(coordinates, color) {
-    var circle = L.circle(coordinates, {
-        color: color,
-        fillColor: color,
-        fillOpacity: 0.1,
-        radius: 50
-    }).addTo(map);
-
-    var circleLeft = L.circle([coordinates[0], coordinates[1] - 360], {
-        color: color,
-        fillColor: color,
-        fillOpacity: 0.1,
-        radius: 50
-    }).addTo(map);
-
-    var circleRight = L.circle([coordinates[0], coordinates[1] + 360], {
-        color: color,
-        fillColor: color,
-        fillOpacity: 0.1,
-        radius: 50
-    }).addTo(map);
+function addMarkerToMap(coordinates, color, popup) {
+    L.marker(coordinates, { icon: getPointMarker(color) }).addTo(map).bindPopup(popup);
+    L.marker([coordinates[0], coordinates[1] - 360], { icon: getPointMarker(color) }).addTo(map).bindPopup(popup);
+    L.marker([coordinates[0], coordinates[1] + 360], { icon: getPointMarker(color) }).addTo(map).bindPopup(popup);
 }
 
 function addLineToMap(start, end, color) {
