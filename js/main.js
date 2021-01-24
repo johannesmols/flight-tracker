@@ -37,7 +37,7 @@ function getPointMarker(color) {
         border: 1px solid #FFFFFF`;
 
     return icon = L.divIcon({
-        className: "marker",
+        className: "",
         iconSize: [12, 12],
         iconAnchor: [6, 12],
         labelAnchor: [-6, 0],
@@ -53,13 +53,13 @@ function getAirplaneMarker(color) {
         height: 12px;
         display: block;
         position: relative;
-        border-radius: 1rem;
-        transform: rotate(0deg);
-        opacity: 0.5;
+        border-radius: 3rem 3rem 1;
+        transform: rotate(45deg);
+        opacity: 1;
         border: 1px solid #FFFFFF`;
 
     return icon = L.divIcon({
-        className: "marker",
+        className: "",
         iconSize: [12, 12],
         iconAnchor: [6, 12],
         labelAnchor: [-6, 0],
