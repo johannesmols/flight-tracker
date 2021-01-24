@@ -85,13 +85,13 @@ function renderFlights(data) {
             var color = getRandomColor();
             var coordinates = [];
             for (var j = 0; j < airports.length; j++) {
-                var coords = lookUpAirport(airports[j]);
-                if (coords) {
-                    coordinates.push(coords);
+                var result = lookUpAirport(airports[j]);
+                if (result[0]) {
+                    coordinates.push(result[0]);
+                    addMarkerToMap(result[0], color, result[1] ? `${airports[j]} - ${result[1]}` : `${airports[j].replace(';', ', ')}`);
                 }
             }
 
-            coordinates.forEach(e => addMarkerToMap(e, color));
             for (var c = 0; c < coordinates.length - 1; c++) {
                 addLineToMap(coordinates[c], coordinates[c + 1], color);
             }
@@ -105,7 +105,7 @@ function lookUpAirport(identOrCoords) {
         const result = allAirports[getColumn(allAirports, 1).indexOf(icao)];
 
         if (result) {
-            return [result[4], result[5]];
+            return [[result[4], result[5]], result[3]];
         } else {
             console.error('Could not find airport with code ' + icao);
         }
@@ -113,7 +113,7 @@ function lookUpAirport(identOrCoords) {
         var coords = identOrCoords.split(';');
 
         if (coords.length == 2) {
-            return [Number(coords[0]), Number(coords[1])];
+            return [[Number(coords[0]), Number(coords[1])], null];
         } {
             console.error('Could not read coordinates ' + coords);
         }
