@@ -112,18 +112,27 @@ function addMarkerToMap(coordinates, color) {
 
 function addLineToMap(start, end, color) {
     // Check whether line crosses the 180th meridian, and split in two if it is the case
-    // https://gis.stackexchange.com/a/18986
     if (Math.abs(start[1] - end[1]) > 180.0) {
-        console.log('start and end coordinates', start, end);
-
         const start_dist_to_antimeridian = start[1] > 0 ? 180 - start[1] : 180 + start[1];
         const end_dist_to_antimeridian = end[1] > 0 ? 180 - end[1] : 180 + end[1];
         const lat_difference = Math.abs(start[0] - end[0]);
-        const alpha_angle = Math.atan(lat_difference / (start_dist_to_antimeridian + end_dist_to_antimeridian)) * (180 / Math.PI);
+        const alpha_angle = Math.atan(lat_difference / (start_dist_to_antimeridian + end_dist_to_antimeridian)) * (180 / Math.PI) * (start[1] > 0 ? 1 : -1);
         const lat_diff_at_antimeridian = Math.tan(alpha_angle * Math.PI / 180) * start_dist_to_antimeridian;
         const intersection_lat = start[0] + lat_diff_at_antimeridian;
         const first_line_end = [intersection_lat, start[1] > 0 ? 180 : -180];
         const second_line_start = [intersection_lat, end[1] > 0 ? 180 : -180];
+
+        if (debug = false) {
+            console.log('Identified line crossing the 180th meridian, start and end:', start, end);
+            console.log('Distance from start point to 180th meridian:', start_dist_to_antimeridian);
+            console.log('Distance from end point to 180th meridian:', end_dist_to_antimeridian);
+            console.log('Lateral difference between start and end:', lat_difference);
+            console.log('Alpha angle of pythagorean triangle connecting the points:', alpha_angle);
+            console.log('Lateral difference from start point to point intersecting the 180th meridian:', lat_diff_at_antimeridian);
+            console.log('Latitude of intersection at 180th meridian:', intersection_lat);
+            console.log('First line ending at:', first_line_end);
+            console.log('Second line starting at:', second_line_start);
+        }
         
         var first_line = L.polyline([start, first_line_end], {
             color: color
