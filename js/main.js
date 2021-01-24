@@ -134,18 +134,25 @@ function addLineToMap(start, end, color) {
             console.log('Second line starting at:', second_line_start);
         }
         
-        var first_line = L.polyline([start, first_line_end], {
-            color: color
-        }).addTo(map);
-
-        var second_line = L.polyline([second_line_start, end], {
-            color: color
-        }).addTo(map);
+        drawLineThrice(start, first_line_end, color);
+        drawLineThrice(second_line_start, end, color);
     } else {
-        var line = L.polyline([start, end], {
-            color: color
-        }).addTo(map);
+        drawLineThrice(start, end, color);
     }
+}
+
+function drawLineThrice(start, end, color) {
+    var regular = L.polyline([start, end], {
+        color: color
+    }).addTo(map);
+
+    var toTheLeft = L.polyline([[start[0], start[1] - 360], [end[0], end[1] - 360]], {
+        color: color
+    }).addTo(map);
+
+    var toTheRight = L.polyline([[start[0], start[1] + 360], [end[0], end[1] + 360]], {
+        color: color
+    }).addTo(map);
 }
 
 loadData();
